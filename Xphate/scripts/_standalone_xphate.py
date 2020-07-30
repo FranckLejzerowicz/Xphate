@@ -14,8 +14,12 @@ from Xphate import __version__
 
 @click.command()
 @click.option(
-    "-i", "--i-table", required=True, type=str,
+    "-i", "--i-table", required=False, type=str,
     help="Features table."
+)
+@click.option(
+    "-j", "--i-res", required=False, type=str,
+    help="Table to make figure from."
 )
 @click.option(
     "-o", "--o-dir-path", required=True, type=str,
@@ -78,20 +82,16 @@ from Xphate import __version__
     default=None, help="Min, Max and Step for the `knns` parameter."
 )
 @click.option(
-    "-j", "--p-jobs", required=False, type=int,
+    "-n", "--p-cpus", required=False, type=int,
     default=1, help="Number of jobs."
 )
-# @click.option(
-#     "-knn", "--p-knn", required=False, type=int,
-#     default=0, help="Filtering quantile / percentile for samples based on"
-#                     " column passed to `-c` (must be between 0 and 100)."
-# )
 @click.option(
     "--verbose/--no-verbose", default=False
 )
 @click.version_option(__version__, prog_name="Xphate")
 def standalone_xphate(
         i_table,
+        i_res,
         o_dir_path,
         m_metadata,
         p_labels,
@@ -104,12 +104,13 @@ def standalone_xphate(
         p_ts,
         p_decays,
         p_knns,
-        p_jobs,
+        p_cpus,
         verbose
 ):
 
     xphate(
         i_table,
+        i_res,
         o_dir_path,
         m_metadata,
         p_labels,
@@ -122,7 +123,7 @@ def standalone_xphate(
         p_ts,
         p_decays,
         p_knns,
-        p_jobs,
+        p_cpus,
         verbose
     )
 
