@@ -15,15 +15,15 @@ from Xphate import __version__
 @click.command()
 @click.option(
     "-i", "--i-table", required=False, type=str,
-    help="Features table."
+    help="Features table, input path."
 )
 @click.option(
     "-j", "--i-res", required=False, type=str,
     help="Table to make figure from."
 )
 @click.option(
-    "-o", "--o-dir-path", required=True, type=str,
-    help="Output directory path."
+    "-o", "--o-html", required=True, type=str,
+    help="Visualization html, output path."
 )
 @click.option(
     "-m", "--m-metadata", required=False, type=str,
@@ -92,7 +92,7 @@ from Xphate import __version__
 def standalone_xphate(
         i_table,
         i_res,
-        o_dir_path,
+        o_html,
         m_metadata,
         p_labels,
         p_column,
@@ -111,7 +111,7 @@ def standalone_xphate(
     xphate(
         i_table,
         i_res,
-        o_dir_path,
+        o_html,
         m_metadata,
         p_labels,
         p_column,

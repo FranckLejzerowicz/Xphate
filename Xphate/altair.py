@@ -9,7 +9,7 @@
 import altair as alt
 
 
-def make_figure(i_table, i_res, figo, full_pds, ts, ts_step,
+def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
                 decays, decays_step, knns, knns_step):
 
     text = []
@@ -101,5 +101,5 @@ def make_figure(i_table, i_res, figo, full_pds, ts, ts_step,
         title=title
     )
 
-    circ.save(figo)
-    print('-> Written:', figo)
+    circ.save(o_html)
+    print('-> Written:', o_html)

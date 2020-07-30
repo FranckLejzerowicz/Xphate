@@ -8,7 +8,7 @@
 
 import os
 import pandas as pd
-from os.path import isfile, isdir
+from os.path import dirname, isfile, isdir, splitext
 
 import multiprocessing as mp
 from sklearn.preprocessing import normalize
@@ -22,7 +22,7 @@ from Xphate.altair import make_figure
 def xphate(
         i_table: str,
         i_res: str,
-        o_dir_path: str,
+        o_html: str,
         m_metadata: str,
         p_columns: tuple = None,
         p_column: str = None,
@@ -55,8 +55,8 @@ def xphate(
         if verbose:
             print('read')
         tab = pd.read_csv(i_table, header=0, index_col=0, sep='\t')
-        if not isdir(o_dir_path):
-            os.makedirs(o_dir_path)
+        if not isdir(dirname(o_html)):
+            os.makedirs(dirname(o_html))
 
         message = 'input'
         if m_metadata and p_column and p_column_value or p_filter_prevalence or p_filter_abundance:
@@ -71,7 +71,7 @@ def xphate(
         tab_norm = pd.DataFrame(normalize(tab, norm='l1', axis=0), index=tab.index, columns=tab.columns).T
         jobs, fpos = [], []
         for knn in knns:
-            fpo = '%s/phate_knn%s_multi_params.tsv' % (o_dir_path, knn)
+            fpo = '%s_tmp%s.tsv' % (splitext(o_html)[0], knn)
             fpos.append(fpo)
             p = mp.Process(target=run_phate, args=(fpo, tab_norm, knn, decays, ts, p_jobs, verbose,))
             jobs.append(p)
@@ -80,8 +80,10 @@ def xphate(
             j.join()
 
         full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
-        fpo = '%s/phate_knn_multi_params.tsv' % o_dir_path
+        fpo = '%s_tmp.tsv' % splitext(o_html)[0]
         full_pds.to_csv(fpo, index=False, sep='\t')
+        for i in fpos:
+            os.remove(i)
 
     metadata, columns = pd.DataFrame(), []
     if m_metadata:
@@ -105,5 +107,4 @@ def xphate(
         if verbose:
             print('done.')
 
-    figo = '%s/phate_knn_multi_params.html' % o_dir_path
-    make_figure(i_table, i_res, figo, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
+    make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
