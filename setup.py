@@ -53,9 +53,7 @@ setup(
     install_requires=[
         "click >= 6.7",
         'pandas >= 0.19.0',
-        'numpy >= 1.12.1',
         'altair >= 4.1.0',
-        'scipy >= 1.5.0',
         'scikit-learn',
         'phate'
     ],
