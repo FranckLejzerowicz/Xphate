@@ -1,5 +1,6 @@
 # Xphate
 
+An interactive vizualization to explore different parameters to [PHATE](https://phate.readthedocs.io/en/stable/index.html)
 
 ## Installation
 

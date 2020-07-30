@@ -38,149 +38,115 @@ def get_metadata(m_metadata: str, p_columns: tuple) -> (pd.DataFrame, str):
     return metadata, columns
 
 
-def run_phate(fpo, tab_norm, knn, decays, ts, n_jobs):
+def run_phate(fpo, tab_norm, knn, decays, ts, n_jobs, verbose):
     phate_op = phate.PHATE()
     data_phates = []
-    if decays and ts:
-        for (decay, t) in itertools.product(*[decays, ts]):
-            print('++++ %s :: %s :: %s ++++' % (knn, decay, t))
-            phate_op.set_params(knn=knn, decay=decay, t=t, n_jobs=n_jobs)
-            data_phate = pd.DataFrame(phate_op.fit_transform(tab_norm),
-                                      columns=['PHATE1', 'PHATE2'])
-            data_phate['knn'] = knn
-            data_phate['decay'] = decay
-            data_phate['t'] = t
-            data_phate['sample_name'] = tab_norm.index.tolist()
-            data_phates.append(data_phate)
-    elif decays:
-        for decay in decays:
-            print('++++ %s :: %s ++++' % (knn, decay))
-            phate_op.set_params(knn=knn, decay=decay, n_jobs=n_jobs)
-            data_phate = pd.DataFrame(phate_op.fit_transform(tab_norm),
-                                      columns=['PHATE1', 'PHATE2'])
-            data_phate['knn'] = knn
-            data_phate['decay'] = decay
-            data_phate['sample_name'] = tab_norm.index.tolist()
-            data_phates.append(data_phate)
-    elif ts:
-        for t in ts:
-            print('++++ %s :: %s ++++' % (knn, t))
-            phate_op.set_params(knn=knn, t=t, n_jobs=n_jobs)
-            data_phate = pd.DataFrame(phate_op.fit_transform(tab_norm),
-                                      columns=['PHATE1', 'PHATE2'])
-            data_phate['knn'] = knn
-            data_phate['t'] = t
-            data_phate['sample_name'] = tab_norm.index.tolist()
-            data_phates.append(data_phate)
-    else:
-        print('++++ %s ++++' % knn)
-        phate_op.set_params(knn=knn, n_jobs=n_jobs)
-        data_phate = pd.DataFrame(phate_op.fit_transform(tab_norm),
-                                  columns=['PHATE1', 'PHATE2'])
+    if not knn:
+        knn = 5
+    for (decay, t) in itertools.product(*[decays, ts]):
+        if not decay:
+            decay = 15
+        if not t:
+            t = 'auto'
+        phate_op.set_params(knn=knn, decay=decay, t=t, n_jobs=n_jobs, verbose=verbose)
+        data_phate = pd.DataFrame(phate_op.fit_transform(tab_norm), columns=['PHATE1', 'PHATE2'])
         data_phate['knn'] = knn
+        data_phate['decay'] = decay
+        data_phate['t'] = t
         data_phate['sample_name'] = tab_norm.index.tolist()
         data_phates.append(data_phate)
     pd.concat(data_phates).to_csv(fpo, index=False, sep='\t')
 
 
-def make_figure(i_table, figo, full_pds, ts, ts_step, decays, decays_step, knns, knns_step):
+def make_figure(i_table, i_res, figo, full_pds, ts, ts_step, decays, decays_step, knns, knns_step):
 
-    slider_knns = alt.binding_range(min=min(knns), max=max(knns), step=knns_step, name='knn')
-    selector_knns = alt.selection_single(name="knn", fields=['knn'],
-                                         bind=slider_knns, init={'knn': min(knns)})
+    text = []
+    if i_table:
+        text.append('PHATE for table "%s"' % i_table)
+    elif i_res:
+        text.append('PHATE for pre-computed table "%s"' % i_res)
+
+    subtext = ['Parameters:']
+
+    tooltip = ['sample_name', 'PHATE1', 'PHATE2']
+    circ = alt.Chart(full_pds).mark_point(size=20).encode(
+        x='PHATE1:Q',
+        y='PHATE2:Q'
+    )
+
+    if knns_step:
+        slider_knns = alt.binding_range(
+            min=min(knns), max=max(knns), step=knns_step, name='knn')
+        selector_knns = alt.selection_single(
+            name="knn", fields=['knn'], bind=slider_knns, init={'knn': min(knns)})
+        tooltip.append('knn')
+        circ = circ.add_selection(
+            selector_knns
+        ).transform_filter(
+            selector_knns
+        )
+        subtext.append('knn ("k") = %s\n' % ', '.join(map(str, knns)))
+
     if decays_step:
-        slider_decays = alt.binding_range(min=min(decays), max=max(decays), step=decays_step, name='decay')
-    else:
-        slider_decays = alt.binding_range(min=min(decays), max=max(decays), step=1, name='decay')
-    selector_decays = alt.selection_single(name="decay", fields=['decay'],
-                                           bind=slider_decays, init={'decay': min(decays)})
-    print(full_pds)
-    if ts_step and 'variable' in full_pds.columns:
-        slider_ts = alt.binding_range(min=min(ts), max=max(ts), step=ts_step, name='t:')
-        selector_ts = alt.selection_single(name="t", fields=['t'],
-                                           bind=slider_ts, init={'t': min(ts)})
-
-        variable_dropdown = alt.binding_select(options=full_pds['variable'].unique(), name='variable:')
-        variable_select = alt.selection_single(fields=['variable'], bind=variable_dropdown, name="variable")
-
-        circ = alt.Chart(full_pds).mark_point(size=8).encode(
-            x='PHATE1:Q',
-            y='PHATE2:Q',
-            color='variable:N'
-        ).add_selection(
-            selector_knns, selector_decays, selector_ts, variable_select
-        ).transform_filter(
-            selector_knns
-        ).transform_filter(
+        slider_decays = alt.binding_range(
+            min=min(decays), max=max(decays), step=decays_step, name='decay')
+        selector_decays = alt.selection_single(
+            name="decay", fields=['decay'], bind=slider_decays, init={'decay': min(decays)})
+        tooltip.append('decay')
+        circ = circ.add_selection(
             selector_decays
         ).transform_filter(
-            selector_ts
-        ).transform_filter(
-            variable_select
+            selector_decays
         )
+        subtext.append('decay ("alpha") = %s\n' % ', '.join(map(str, decays)))
 
-    elif ts_step:
-        slider_ts = alt.binding_range(min=min(ts), max=max(ts), step=ts_step, name='t:')
-        selector_ts = alt.selection_single(name="cutoff3", fields=['cutoff3'],
-                                           bind=slider_ts, init={'cutoff3': min(ts)})
-
-        circ = alt.Chart(full_pds).mark_point(size=8).encode(
-            x='PHATE1:Q',
-            y='PHATE2:Q',
-        ).add_selection(
-            selector_knns, selector_decays, selector_ts
-        ).transform_filter(
-            selector_knns
-        ).transform_filter(
-            selector_decays
+    if ts_step:
+        slider_ts = alt.binding_range(
+            min=min(ts), max=max(ts), step=ts_step, name='t:')
+        selector_ts = alt.selection_single(
+            name="t", fields=['t'], bind=slider_ts, init={'t': min(ts)})
+        tooltip.append('t')
+        circ = circ.add_selection(
+            selector_ts
         ).transform_filter(
             selector_ts
         )
+        subtext.append('t = %s\n' % ', '.join(map(str, ts)))
 
-    elif 'variable' in full_pds.columns:
-        print('fff')
-        variable_dropdown = alt.binding_select(options=full_pds['variable'].unique(), name='variable:')
-        variable_select = alt.selection_single(fields=['variable'], bind=variable_dropdown, name="variable")
-
-        circ = alt.Chart(full_pds).mark_point(size=8).encode(
-            x='PHATE1:Q',
-            y='PHATE2:Q',
+    if 'variable' in full_pds.columns:
+        variable_dropdown = alt.binding_select(
+            options=full_pds['variable'].unique(), name='variable:')
+        variable_select = alt.selection_single(
+            fields=['variable'], bind=variable_dropdown, name="variable",
+            init={'variable': sorted(full_pds['variable'], key=lambda x: -len(x))[0]})
+        tooltip.extend(['variable', 'factor'])
+        circ = circ.encode(
             color='factor:N'
         ).add_selection(
-            selector_knns, selector_decays, variable_select
-        ).transform_filter(
-            selector_knns
-        ).transform_filter(
-            selector_decays
+            variable_select
         ).transform_filter(
             variable_select
         )
 
-    else:
+    circ = circ.encode(tooltip=tooltip)
 
-        circ = alt.Chart(full_pds).mark_point(size=8).encode(
-            x='PHATE1:Q',
-            y='PHATE2:Q',
-        ).add_selection(
-            selector_knns, selector_decays
-        ).transform_filter(
-            selector_knns
-        ).transform_filter(
-            selector_decays
-        )
+    title = {
+        "text": text,
+        "color": "black",
+    }
+    if subtext != ['Parameters:']:
+        title.update({
+            "subtitle": (subtext + ["(based on altair)"]),
+            "subtitleColor": "grey"
+        })
 
-    circ.resolve_legend(
+    circ = circ.resolve_legend(
         color="independent",
         size="independent"
     ).properties(
         width=400,
         height=400,
-        title={
-            "text": 'PHATE',
-            "subtitle": ([i_table] + ["(based on altair)"]),
-            "color": "black",
-            "subtitleColor": "grey"
-        }
+        title=title
     )
 
     circ.save(figo)
@@ -203,8 +169,21 @@ def get_metadata(m_metadata: str, p_columns: tuple) -> (pd.DataFrame, str):
     return metadata, columns
 
 
+def get_param(p_param):
+    param_step = None
+    param = [None]
+    if len(p_param) == 3:
+        param_step = p_param[-1]
+        param = range(p_param[0], (p_param[1] + 1), param_step)
+    elif len(p_param) == 1:
+        param_step = None
+        param = [p_param[0]]
+    return param_step, param
+
+
 def xphate(
         i_table: str,
+        i_res: str,
         o_dir_path: str,
         m_metadata: str,
         p_columns: tuple = None,
@@ -221,76 +200,52 @@ def xphate(
         verbose: bool = False
     ):
 
-    if not isfile(i_table):
-        raise IOError("No input table found at %s" % i_table)
-
     if verbose:
-        print('read')
-    tab = pd.read_csv(i_table, header=0, index_col=0, sep='\t')
-    if not isdir(o_dir_path):
-        os.makedirs(o_dir_path)
-
-    message = 'input'
-    if m_metadata and p_column and p_column_value or p_filter_prevalence or p_filter_abundance:
-        # Filter / Transform OTU-table
-        tab = do_filter(tab, m_metadata, p_filter_prevalence,
-                        p_filter_abundance, p_filter_order,
-                        p_column, p_column_value, p_column_quant)
-        message = 'filtered'
-
-    if tab.shape[0] < 10:
-        raise IOError('Too few features in the %s table' % message)
-
-    if verbose:
-        print('Table dimension:', tab.shape)
-        print('normalize')
-
-    tab_norm = pd.DataFrame(normalize(tab, norm='l1', axis=0),
-                            index=tab.index,
-                            columns=tab.columns).T
-    jobs = []
-    fpos = []
-
-    if len(p_ts) == 3:
-        ts_step = p_ts[-1]
-        ts = range(p_ts[0], p_ts[1], ts_step)
+        verbose = 1
     else:
-        ts_step = None
-        ts = None
+        verbose = 0
 
-    if len(p_decays) == 3:
-        decays_step = p_decays[-1]
-        decays = range(p_decays[0], p_decays[1], decays_step)
+    ts_step, ts = get_param(p_ts)
+    decays_step, decays = get_param(p_decays)
+    knns_step, knns = get_param(p_knns)
+
+    if i_res:
+        full_pds = pd.read_csv(i_res, header=0, sep='\t', dtype={'sample_name': str})
     else:
-        decays_step = None
-        decays = [15]
+        if not isfile(i_table):
+            raise IOError("No input table found at %s" % i_table)
+        if verbose:
+            print('read')
+        tab = pd.read_csv(i_table, header=0, index_col=0, sep='\t')
+        if not isdir(o_dir_path):
+            os.makedirs(o_dir_path)
 
-    if len(p_knns) == 3:
-        knns_step = p_knns[-1]
-        knns = range(p_knns[0], p_knns[1], knns_step)
-    else:
-        knns_step = 5
-        knns = range(5, 21, knns_step)
+        message = 'input'
+        if m_metadata and p_column and p_column_value or p_filter_prevalence or p_filter_abundance:
+            # Filter / Transform OTU-table
+            tab = do_filter(tab, m_metadata, p_filter_prevalence,
+                            p_filter_abundance, p_filter_order,
+                            p_column, p_column_value, p_column_quant)
+            message = 'filtered'
+        if tab.shape[0] < 10:
+            raise IOError('Too few features in the %s table' % message)
 
-    for knn in knns:
-        fpo = '%s/phate_knn%s_multi_params.tsv' % (o_dir_path, knn)
-        fpos.append(fpo)
-        p = mp.Process(
-            target=run_phate,
-            args=(fpo, tab_norm, knn, decays, ts, p_jobs,)
-        )
-        jobs.append(p)
-        p.start()
+        tab_norm = pd.DataFrame(normalize(tab, norm='l1', axis=0), index=tab.index, columns=tab.columns).T
+        jobs, fpos = [], []
+        for knn in knns:
+            fpo = '%s/phate_knn%s_multi_params.tsv' % (o_dir_path, knn)
+            fpos.append(fpo)
+            p = mp.Process(target=run_phate, args=(fpo, tab_norm, knn, decays, ts, p_jobs, verbose,))
+            jobs.append(p)
+            p.start()
+        for j in jobs:
+            j.join()
 
-    for j in jobs:
-        j.join()
+        full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
+        fpo = '%s/phate_knn_multi_params.tsv' % o_dir_path
+        full_pds.to_csv(fpo, index=False, sep='\t')
 
-    full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t') for x in fpos])
-    fpo = '%s/phate_knn_multi_params.tsv' % o_dir_path
-    full_pds.to_csv(fpo, index=False, sep='\t')
-
-    metadata = pd.DataFrame()
-    columns = []
+    metadata, columns = pd.DataFrame(), []
     if m_metadata:
         if verbose:
             print('Read metadata...', end='')
@@ -309,4 +264,4 @@ def xphate(
         full_pds = full_pds.merge(metadata, on='sample_name', how='left')
 
     figo = '%s/phate_knn_multi_params.html' % o_dir_path
-    make_figure(i_table, figo, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
+    make_figure(i_table, i_res, figo, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
