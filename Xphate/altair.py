@@ -12,6 +12,7 @@ import altair as alt
 def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
                 decays, decays_step, knns, knns_step):
 
+    print("full_pds['variable'].unique()")
     print(full_pds['variable'].unique())
 
     text = []
