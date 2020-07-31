@@ -12,9 +12,6 @@ import altair as alt
 def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
                 decays, decays_step, knns, knns_step):
 
-    print("full_pds['variable'].unique()")
-    print(full_pds['variable'].unique())
-
     text = []
     if i_table:
         text.append('PHATE for table "%s"' % i_table)
@@ -69,11 +66,12 @@ def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
         subtext.append('t = %s\n' % ', '.join(map(str, ts)))
 
     if 'variable' in full_pds.columns:
+        init = sorted([x for x in full_pds['variable'] if str(x)!='nan'], key=lambda x: -len(x))[0]
         variable_dropdown = alt.binding_select(
             options=full_pds['variable'].unique(), name='variable:')
         variable_select = alt.selection_single(
-            fields=['variable'], bind=variable_dropdown, name="variable",
-            init={'variable': sorted(full_pds['variable'], key=lambda x: -len(x))[0]})
+            fields=['variable'], bind=variable_dropdown,
+            name="variable", init={'variable': init})
         tooltip.extend(['variable', 'factor'])
         circ = circ.encode(
             color='factor:N'
