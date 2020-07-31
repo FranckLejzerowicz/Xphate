@@ -34,10 +34,6 @@ from Xphate import __version__
     help="Sample metadata column(s) to use for labeling."
 )
 @click.option(
-    "-m", "--m-metadata", required=False, type=str,
-    default=None, help="Metadata table."
-)
-@click.option(
     "-c", "--p-column", required=False, type=str,
     default=None, help="Column from metadata `-m` to use for "
                        "filtering based on values of `-v`."

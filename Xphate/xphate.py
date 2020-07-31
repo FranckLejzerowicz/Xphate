@@ -8,7 +8,7 @@
 
 import os
 import pandas as pd
-from os.path import dirname, isfile, isdir, splitext
+from os.path import abspath, dirname, isfile, isdir, splitext
 
 import multiprocessing as mp
 from sklearn.preprocessing import normalize
@@ -43,18 +43,25 @@ def xphate(
     else:
         verbose = 0
 
-    ts_step, ts = get_param(p_ts)
-    decays_step, decays = get_param(p_decays)
-    knns_step, knns = get_param(p_knns)
+    suffix = ''
+    ts_step, ts = get_param(p_ts, 't', suffix)
+    decays_step, decays = get_param(p_decays, 'd', suffix)
+    knns_step, knns = get_param(p_knns, 'k', suffix)
 
     if i_res:
         full_pds = pd.read_csv(i_res, header=0, sep='\t', dtype={'sample_name': str})
     else:
+        i_table = abspath(i_table)
         if not isfile(i_table):
             raise IOError("No input table found at %s" % i_table)
         if verbose:
             print('read')
         tab = pd.read_csv(i_table, header=0, index_col=0, sep='\t')
+
+        o_html = abspath(o_html)
+        if not o_html.endswith('.html'):
+            o_html = '%s%s.html' % (o_html, suffix)
+
         if not isdir(dirname(o_html)):
             os.makedirs(dirname(o_html))
 
@@ -68,19 +75,25 @@ def xphate(
         if tab.shape[0] < 10:
             raise IOError('Too few features in the %s table' % message)
 
-        tab_norm = pd.DataFrame(normalize(tab, norm='l1', axis=0), index=tab.index, columns=tab.columns).T
+        tab_norm = pd.DataFrame(
+            normalize(tab, norm='l1', axis=0),
+            index=tab.index, columns=tab.columns).T
+
         jobs, fpos = [], []
         for knn in knns:
-            fpo = '%s_tmp%s.tsv' % (splitext(o_html)[0], knn)
+            fpo = '%s_tmp-%s.tsv' % (splitext(o_html)[0], knn)
             fpos.append(fpo)
-            p = mp.Process(target=run_phate, args=(fpo, tab_norm, knn, decays, ts, p_jobs, verbose,))
+            p = mp.Process(
+                target=run_phate,
+                args=(fpo, tab_norm, knn, decays,
+                      ts, p_jobs, verbose,))
             jobs.append(p)
             p.start()
         for j in jobs:
             j.join()
 
         full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
-        fpo = '%s_tmp.tsv' % splitext(o_html)[0]
+        fpo = '%s_xphate.tsv' % splitext(o_html)[0]
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
             os.remove(i)
@@ -92,6 +105,10 @@ def xphate(
         metadata, columns = get_metadata(m_metadata, p_columns)
         if verbose:
             print('done.')
+
+    full_pds_clusters = full_pds.copy()
+    full_pds_clusters['variable'] = 'Silhouette_score_cluster'
+    full_pds_clusters.rename(columns={'cluster': 'factor'}, inplace=True)
 
     if metadata.shape[0] and len(columns):
         if verbose:
@@ -106,5 +123,5 @@ def xphate(
         full_pds = full_pds.merge(metadata, on='sample_name', how='left')
         if verbose:
             print('done.')
-
+    full_pds = pd.concat([full_pds, full_pds_clusters], sort=False)
     make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)

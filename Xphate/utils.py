@@ -9,16 +9,19 @@
 import pandas as pd
 
 
-def get_param(p_param):
+def get_param(p_param, param, suffix):
     param_step = None
-    param = [None]
+    param_range = [None]
     if len(p_param) == 3:
         param_step = p_param[-1]
-        param = range(p_param[0], (p_param[1] + 1), param_step)
+        param_range = range(p_param[0], (p_param[1] + 1), param_step)
+        suffix += '_%s-%s-%s-%s' % (
+            param, p_param[0], (p_param[1] + 1), param_step)
     elif len(p_param) == 1:
         param_step = None
-        param = [p_param[0]]
-    return param_step, param
+        param_range = [p_param[0]]
+        suffix += '_%s-%s' % (param, p_param[0])
+    return param_step, param_range
 
 
 def get_metadata(m_metadata: str, p_columns: tuple) -> (pd.DataFrame, str):
