@@ -121,7 +121,7 @@ def xphate(
             columns={'level_1': 'variable', 0: 'factor'}
         )
         full_pds_meta = full_pds.drop(
-            columns=['factor']
+            columns=['variable', 'factor']
         ).merge(
             metadata, on='sample_name', how='left'
         )
