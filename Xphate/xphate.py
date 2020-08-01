@@ -124,7 +124,7 @@ def xphate(
         if verbose:
             print('done.')
 
-    print("full_pds)"
+    print("full_pds")
     print(full_pds)
 
     print("full_pds_clusters")
