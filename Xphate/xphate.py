@@ -123,5 +123,12 @@ def xphate(
         full_pds = full_pds.merge(metadata, on='sample_name', how='left')
         if verbose:
             print('done.')
+
+    print("full_pds)"
+    print(full_pds)
+
+    print("full_pds_clusters")
+    print(full_pds_clusters)
+
     full_pds = pd.concat([full_pds, full_pds_clusters], sort=False)
     make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
