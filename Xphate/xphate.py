@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import os
+import sys
 import pandas as pd
 from os.path import abspath, dirname, isfile, isdir, splitext
 
@@ -61,7 +62,6 @@ def xphate(
         o_html = abspath(o_html)
         if not o_html.endswith('.html'):
             o_html = '%s%s.html' % (o_html, suffix)
-
         if not isdir(dirname(o_html)):
             os.makedirs(dirname(o_html))
 
@@ -98,6 +98,11 @@ def xphate(
         for i in fpos:
             os.remove(i)
 
+    if full_pds.sample_name.unique().size <= 30:
+        print('Too few samples to perform PHATE...')
+        sys.exit(0)
+
+
     metadata, columns = pd.DataFrame(), []
     if m_metadata:
         if verbose:
@@ -127,11 +132,6 @@ def xphate(
         )
         if verbose:
             print('done.')
-        print("full_pds_meta")
-        print(full_pds_meta)
         full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
-
-    print("full_pds")
-    print(full_pds)
 
     make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
