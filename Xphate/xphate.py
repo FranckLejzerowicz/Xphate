@@ -120,6 +120,8 @@ def xphate(
         ).stack().reset_index().rename(
             columns={'level_1': 'variable', 0: 'factor'}
         )
+        print("metadata")
+        print(metadata)
         full_pds = full_pds.merge(metadata, on='sample_name', how='left')
         if verbose:
             print('done.')
