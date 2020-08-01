@@ -106,11 +106,9 @@ def xphate(
         if verbose:
             print('done.')
 
-    full_pds_clusters = full_pds.copy()
-    full_pds_clusters['variable'] = 'Silhouette_score_cluster'
-    full_pds_clusters.rename(columns={'cluster': 'factor'}, inplace=True)
-    print("full_pds_clusters")
-    print(full_pds_clusters)
+    full_pds = full_pds.copy()
+    full_pds['variable'] = 'Silhouette_score_cluster'
+    full_pds.rename(columns={'cluster': 'factor'}, inplace=True)
 
     if metadata.shape[0] and len(columns):
         if verbose:
@@ -122,17 +120,16 @@ def xphate(
         ).stack().reset_index().rename(
             columns={'level_1': 'variable', 0: 'factor'}
         )
-        print("metadata")
-        print(metadata)
-        full_pds = full_pds.merge(metadata, on='sample_name', how='left')
+        full_pds_meta = full_pds.drop(
+            columns=['cluster']
+        ).merge(
+            metadata, on='sample_name', how='left'
+        )
         if verbose:
             print('done.')
+        full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
 
     print("full_pds")
     print(full_pds)
 
-    print("full_pds_clusters")
-    print(full_pds_clusters)
-
-    full_pds = pd.concat([full_pds, full_pds_clusters], sort=False)
     make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
