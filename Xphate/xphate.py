@@ -127,6 +127,8 @@ def xphate(
         )
         if verbose:
             print('done.')
+        print("full_pds_meta")
+        print(full_pds_meta)
         full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
 
     print("full_pds")
