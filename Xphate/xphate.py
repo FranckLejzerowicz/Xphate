@@ -109,6 +109,8 @@ def xphate(
     full_pds_clusters = full_pds.copy()
     full_pds_clusters['variable'] = 'Silhouette_score_cluster'
     full_pds_clusters.rename(columns={'cluster': 'factor'}, inplace=True)
+    print("full_pds_clusters")
+    print(full_pds_clusters)
 
     if metadata.shape[0] and len(columns):
         if verbose:
