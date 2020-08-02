@@ -78,6 +78,9 @@ def xphate(
         tab_norm = pd.DataFrame(
             normalize(tab, norm='l1', axis=0),
             index=tab.index, columns=tab.columns).T
+        if tab_norm.columns.size <= 50:
+            print('Too few samples to perform PHATE...')
+            sys.exit(0)
 
         jobs, fpos = [], []
         for knn in knns:
@@ -97,11 +100,6 @@ def xphate(
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
             os.remove(i)
-
-    if full_pds.sample_name.unique().size <= 30:
-        print('Too few samples to perform PHATE...')
-        sys.exit(0)
-
 
     metadata, columns = pd.DataFrame(), []
     if m_metadata:
