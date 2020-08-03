@@ -65,8 +65,6 @@ def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
         )
         subtext.append('t = %s\n' % ', '.join(map(str, ts)))
 
-    print(full_pds)
-
     if 'variable' in full_pds.columns:
         init = sorted([x for x in full_pds['variable'] if str(x) != 'nan'], key=lambda x: -len(x))[0]
         variable_dropdown = alt.binding_select(

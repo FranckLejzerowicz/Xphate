@@ -96,6 +96,11 @@ def xphate(
             j.join()
 
         full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
+        full_pds = full_pds.set_index(
+            [x for x in full_pds.columns if 'cluster' not in x]
+        ).stack().reset_index().rename(
+            columns={'level_6': 'variable', 0: 'factor'}
+        )
         fpo = '%s_xphate.tsv' % splitext(o_html)[0]
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
@@ -108,10 +113,6 @@ def xphate(
         metadata, columns = get_metadata(m_metadata, p_columns)
         if verbose:
             print('done.')
-
-    full_pds = full_pds.copy()
-    full_pds['variable'] = 'Silhouette_score_cluster'
-    full_pds.rename(columns={'cluster': 'factor'}, inplace=True)
 
     if metadata.shape[0] and len(columns):
         if verbose:
