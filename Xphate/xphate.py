@@ -79,7 +79,7 @@ def xphate(
             normalize(tab, norm='l1', axis=0),
             index=tab.index, columns=tab.columns).T
         if tab_norm.columns.size <= 50:
-            print('Too few samples to perform PHATE...')
+            print('Too few samples to perform PHATE (%s samples)' % tab_norm.columns.size)
             sys.exit(0)
 
         jobs, fpos = [], []
