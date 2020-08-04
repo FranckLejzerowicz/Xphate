@@ -72,14 +72,22 @@ def xphate(
                             p_filter_abundance, p_filter_order,
                             p_column, p_column_value, p_column_quant)
             message = 'filtered'
+
+        o_few = '%s/TOO_FEW.%sf.skip' % (dirname(o_html), tab.shape[0])
         if tab.shape[0] < 10:
-            raise IOError('Too few features in the %s table' % message)
+            print('Too few features to perform PHATE (%s features)' % tab.shape[0])
+            with open(o_few, 'w'):
+                pass
+            sys.exit(0)
 
         tab_norm = pd.DataFrame(
             normalize(tab, norm='l1', axis=0),
             index=tab.index, columns=tab.columns).T
-        if tab_norm.columns.size <= 50:
+        o_few = '%s/TOO_FEW.%ss.skip' % (dirname(o_html), tab_norm.columns.size)
+        if isfile(o_few) or tab_norm.columns.size <= 50:
             print('Too few samples to perform PHATE (%s samples)' % tab_norm.columns.size)
+            with open(o_few, 'w'):
+                pass
             sys.exit(0)
 
         jobs, fpos = [], []
