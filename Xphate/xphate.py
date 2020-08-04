@@ -122,11 +122,6 @@ def xphate(
         if verbose:
             print('done.')
 
-    print("metadata")
-    print(metadata)
-    print("columns")
-    print(columns)
-
     if metadata.shape[0] and len(columns):
         if verbose:
             print('Merge metadata...', end='')
@@ -145,8 +140,5 @@ def xphate(
         if verbose:
             print('done.')
         full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
-
-    print("full_pds")
-    print(full_pds)
 
     make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
