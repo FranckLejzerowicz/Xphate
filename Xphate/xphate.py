@@ -103,7 +103,8 @@ def xphate(
         for j in jobs:
             j.join()
 
-        full_pds = pd.concat([pd.read_csv(x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
+        full_pds = pd.concat([pd.read_csv(
+            x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
         full_pds = full_pds.set_index(
             [x for x in full_pds.columns if 'cluster' not in x]
         ).stack().reset_index().rename(
@@ -129,7 +130,17 @@ def xphate(
             (['sample_name'] + columns)
         ].set_index(
             'sample_name'
-        ).stack().reset_index().rename(
+        )
+        dtypes = {}
+        for col in columns:
+            dt = str(metadata[col].dtype)
+            if dt == 'object':
+                dtype = 'categorical'
+            else:
+                dtype = 'numerical'
+            dtypes[col] = dtype
+
+        metadata = metadata.stack().reset_index().rename(
             columns={'level_1': 'variable', 0: 'factor'}
         )
         full_pds_meta = full_pds.drop(
@@ -137,8 +148,11 @@ def xphate(
         ).merge(
             metadata, on='sample_name', how='left'
         )
+        full_pds_meta['dtype'] = [dtypes[var] for var in full_pds_meta.variable]
         if verbose:
             print('done.')
+        full_pds['dtype'] = 'categorical'
         full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
 
-    make_figure(i_table, i_res, o_html, full_pds, ts, ts_step, decays, decays_step, knns, knns_step)
+    make_figure(i_table, i_res, o_html, full_pds, ts,
+                ts_step, decays, decays_step, knns, knns_step)
