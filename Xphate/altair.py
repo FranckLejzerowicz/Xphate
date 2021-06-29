@@ -11,9 +11,9 @@ import altair as alt
 
 def make_subplot(circ, select, tooltip, dtype):
     if dtype == 'N':
-        title = 'Numerical variables'
-    elif dtype == 'Q':
         title = 'Categorical variables'
+    elif dtype == 'Q':
+        title = 'Numerical variables'
     tooltip.extend(['variable', 'factor'])
     circ_dtype = circ.encode(
         color='factor:%s' % dtype,
