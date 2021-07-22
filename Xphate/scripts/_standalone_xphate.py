@@ -85,6 +85,9 @@ from Xphate import __version__
     "--clusters/--no-clusters", default=False
 )
 @click.option(
+    "--separate/--no-separate", default=False
+)
+@click.option(
     "--verbose/--no-verbose", default=False
 )
 @click.version_option(__version__, prog_name="Xphate")
@@ -105,6 +108,7 @@ def standalone_xphate(
         p_knns,
         p_cpus,
         clusters,
+        separate,
         verbose
 ):
 
@@ -125,6 +129,7 @@ def standalone_xphate(
         p_knns,
         p_cpus,
         clusters,
+        separate,
         verbose
     )
 

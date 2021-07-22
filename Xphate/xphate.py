@@ -37,6 +37,7 @@ def xphate(
         p_knns: tuple = None,
         p_jobs: int = 1,
         clusters: bool = False,
+        separate: bool = False,
         verbose: bool = False
     ):
 
@@ -156,4 +157,5 @@ def xphate(
         full_pds = pd.concat([full_pds, full_pds_meta], sort=False)
 
     make_figure(i_table, i_res, o_html, full_pds, ts,
-                ts_step, decays, decays_step, knns, knns_step, clusters)
+                ts_step, decays, decays_step, knns, knns_step,
+                clusters, separate)

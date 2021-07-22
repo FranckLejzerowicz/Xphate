@@ -7,6 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import altair as alt
+import itertools as itr
 
 
 def make_subplot(circ, select, tooltip, dtype):
@@ -28,16 +29,8 @@ def make_subplot(circ, select, tooltip, dtype):
     return circ_dtype
 
 
-def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
-                decays, decays_step, knns, knns_step, clusters):
-
-    if not clusters:
-        full_pds = full_pds.loc[~full_pds.variable.str.contains('cluster_k')]
-    text = []
-    if i_table:
-        text.append('PHATE for table "%s"' % i_table)
-    elif i_res:
-        text.append('PHATE for pre-computed table "%s"' % i_res)
+def selectors_figure(text, o_html, full_pds, ts, ts_step,
+                     decays, decays_step, knns, knns_step):
 
     subtext = ['Parameters:']
     tooltip = ['sample_name', 'PHATE1', 'PHATE2']
@@ -152,14 +145,105 @@ def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
     elif has_cats:
         circ = cats_plot
 
-    # circ = circ.resolve_legend(
-    #     color="independent",
-    #     size="independent"
-    # ).properties(
-    #     width=400,
-    #     height=400,
-    #     title=title
-    # )
-    #
     circ.save(o_html)
     print('-> Written:', o_html)
+
+
+def single_figure(text, o_html, full_pds):
+
+    subtext = ['Parameters:']
+    tooltip = ['sample_name', 'PHATE1', 'PHATE2']
+
+    circ = alt.Chart(full_pds).mark_point(size=20).encode(
+        x='PHATE1:Q',
+        y='PHATE2:Q'
+    )
+
+    has_cats = 0
+    has_nums = 0
+    if 'variable' in full_pds.columns:
+
+        dtypes_set = set(full_pds['dtype'])
+        if 'categorical' in dtypes_set:
+            cats = full_pds.loc[full_pds.dtype == 'categorical']
+            cats_init = sorted([
+                x for x in cats['variable'] if str(x) != 'nan'],
+                key=lambda x: -len(x))[0]
+            cats_dropdown = alt.binding_select(
+                options=cats['variable'].unique(), name='variable:')
+            cats_select = alt.selection_single(
+                fields=['variable'], bind=cats_dropdown,
+                name="categorical variable", init={'variable': cats_init})
+            cats_plot = make_subplot(
+                circ, cats_select, list(tooltip), 'N')
+            has_cats = 1
+
+        if 'numerical' in dtypes_set:
+            nums = full_pds.loc[full_pds.dtype == 'numerical']
+            cats_init = sorted([
+                x for x in nums['variable'] if str(x) != 'nan'],
+                key=lambda x: -len(x))[0]
+            nums_dropdown = alt.binding_select(
+                options=nums['variable'].unique(), name='variable:')
+            nums_select = alt.selection_single(
+                fields=['variable'], bind=nums_dropdown,
+                name="numerical variable", init={'variable': cats_init})
+            nums_plot = make_subplot(
+                circ, nums_select, list(tooltip), 'Q')
+            has_nums = 1
+
+    title = {
+        "text": text,
+        "color": "black",
+    }
+    if subtext != ['Parameters:']:
+        title.update({
+            "subtitle": (subtext + ["(based on altair)"]),
+            "subtitleColor": "grey"
+        })
+
+    if has_nums and has_cats:
+        circ = alt.hconcat(cats_plot, nums_plot)
+    elif has_nums:
+        circ = nums_plot
+    elif has_cats:
+        circ = cats_plot
+
+    circ.save(o_html)
+    print('-> Written:', o_html)
+
+
+def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
+                decays, decays_step, knns, knns_step, clusters, separate):
+
+    if not clusters:
+        full_pds = full_pds.loc[~full_pds.variable.str.contains('cluster_k')]
+    text = []
+    if i_table:
+        text.append('PHATE for table "%s"' % i_table)
+    elif i_res:
+        text.append('PHATE for pre-computed table "%s"' % i_res)
+
+    if separate:
+        iterator = []
+        if ts != [None]:
+            ts_ = range(min(ts), (max(ts) + 1), ts_step)
+            iterator.append([('t', x) for x in ts_])
+        if knns != [None]:
+            knns_ = range(min(knns), (max(knns) + 1), knns_step)
+            iterator.append([('knn', x) for x in knns_])
+        if decays != [None]:
+            decays_ = range(min(decays), (max(decays) + 1), decays_step)
+            iterator.append([('decay', x) for x in decays_])
+        for its in itr.product(*iterator):
+            suffix = '-'.join(['%s%s' % (x[0], x[1]) for x in its])
+            cur_o_html = o_html.replace('.html', '_%s.html' % suffix)
+            cur_full_pds = full_pds.copy()
+            for (k, v) in its:
+                cur_full_pds = cur_full_pds.loc[full_pds[k] == v]
+            single_figure(text, cur_o_html, cur_full_pds)
+    else:
+        selectors_figure(text, o_html, full_pds, ts, ts_step, decays,
+                         decays_step, knns, knns_step)
+
+
