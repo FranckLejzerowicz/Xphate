@@ -29,8 +29,10 @@ def make_subplot(circ, select, tooltip, dtype):
 
 
 def make_figure(i_table, i_res, o_html, full_pds, ts, ts_step,
-                decays, decays_step, knns, knns_step):
+                decays, decays_step, knns, knns_step, clusters):
 
+    if not clusters:
+        full_pds = full_pds.loc[~full_pds.variable.str.contains('cluster_k')]
     text = []
     if i_table:
         text.append('PHATE for table "%s"' % i_table)

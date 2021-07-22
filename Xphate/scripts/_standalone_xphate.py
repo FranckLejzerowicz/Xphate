@@ -82,6 +82,9 @@ from Xphate import __version__
     default=1, help="Number of jobs."
 )
 @click.option(
+    "--clusters/--no-clusters", default=False
+)
+@click.option(
     "--verbose/--no-verbose", default=False
 )
 @click.version_option(__version__, prog_name="Xphate")
@@ -101,6 +104,7 @@ def standalone_xphate(
         p_decays,
         p_knns,
         p_cpus,
+        clusters,
         verbose
 ):
 
@@ -120,6 +124,7 @@ def standalone_xphate(
         p_decays,
         p_knns,
         p_cpus,
+        clusters,
         verbose
     )
 
