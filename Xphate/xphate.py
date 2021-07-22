@@ -38,6 +38,7 @@ def xphate(
         p_jobs: int = 1,
         clusters: bool = False,
         separate: bool = False,
+        make_3d: bool = True,
         verbose: bool = False
     ):
 
@@ -99,7 +100,7 @@ def xphate(
             p = mp.Process(
                 target=run_phate,
                 args=(fpo, tab_norm, knn, decays,
-                      ts, p_jobs, verbose,))
+                      ts, p_jobs, make_3d, verbose,))
             jobs.append(p)
             p.start()
         for j in jobs:

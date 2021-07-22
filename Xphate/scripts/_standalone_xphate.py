@@ -88,6 +88,9 @@ from Xphate import __version__
     "--separate/--no-separate", default=False
 )
 @click.option(
+    "--make_3d/--no-make_3d", default=True
+)
+@click.option(
     "--verbose/--no-verbose", default=False
 )
 @click.version_option(__version__, prog_name="Xphate")
@@ -109,6 +112,7 @@ def standalone_xphate(
         p_cpus,
         clusters,
         separate,
+        make_3d,
         verbose
 ):
 
@@ -130,6 +134,7 @@ def standalone_xphate(
         p_cpus,
         clusters,
         separate,
+        make_3d,
         verbose
     )
 
