@@ -93,13 +93,15 @@ def xphate(
                 pass
             sys.exit(0)
 
-        jobs, fpos = [], []
+        jobs, fpos, fpos_3d = [], [], []
         for knn in knns:
             fpo = '%s_tmp-%s.tsv' % (splitext(o_html)[0], knn)
             fpos.append(fpo)
+            fpo_3d = '%s_tmp-%s_3d.tsv' % (splitext(o_html)[0], knn)
+            fpos_3d.append(fpo_3d)
             p = mp.Process(
                 target=run_phate,
-                args=(fpo, tab_norm, knn, decays,
+                args=(fpo, fpo_3d, tab_norm, knn, decays,
                       ts, p_jobs, make_3d, verbose,))
             jobs.append(p)
             p.start()
@@ -117,6 +119,20 @@ def xphate(
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
             os.remove(i)
+
+        if make_3d:
+            full_pds_3d = pd.concat([pd.read_csv(
+                x, header=0, sep='\t', dtype={'sample_name': str}) for x in
+                fpos_3d])
+            full_pds_3d = full_pds_3d.set_index(
+                [x for x in full_pds_3d.columns if 'cluster' not in x]
+            ).stack().reset_index().rename(
+                columns={'level_6': 'variable', 0: 'factor'}
+            )
+            fpo_3d = '%s_xphate_3d.tsv' % splitext(o_html)[0]
+            full_pds_3d.to_csv(fpo_3d, index=False, sep='\t')
+            for i_3d in fpos_3d:
+                os.remove(i_3d)
 
     metadata, columns = pd.DataFrame(), []
     if m_metadata:

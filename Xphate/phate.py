@@ -12,7 +12,7 @@ import phate
 import itertools
 
 
-def run_phate(fpo, tab_norm, knn, decays, ts, n_jobs, make_3d, verbose):
+def run_phate(fpo, fpo_3d, tab_norm, knn, decays, ts, n_jobs, make_3d, verbose):
     data_phates = []
     data_phates_3d = []
     if not knn:
@@ -48,5 +48,4 @@ def run_phate(fpo, tab_norm, knn, decays, ts, n_jobs, make_3d, verbose):
 
     pd.concat(data_phates).to_csv(fpo, index=False, sep='\t')
     if make_3d:
-        fpo_3d = '%s_3d.tsv' % splitext(fpo)[0]
         pd.concat(data_phates_3d).to_csv(fpo_3d, index=False, sep='\t')
