@@ -39,7 +39,7 @@ def run_phate(fpo, fpo_3d, tab_norm, knn, decays, ts, n_jobs, make_3d, verbose):
             phate_op.set_params(n_components=3)
             phate_3d = phate_op.transform()
             data_phate_3d = pd.DataFrame(
-                phate_3d, columns=['PHATE1', 'PHATE2', 'PHAT3'])
+                phate_3d, columns=['PHATE1', 'PHATE2', 'PHATE3'])
             data_phate['knn'] = knn
             data_phate['decay'] = decay
             data_phate['t'] = t

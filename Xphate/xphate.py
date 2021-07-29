@@ -120,21 +120,19 @@ def xphate(
         for i in fpos:
             os.remove(i)
 
-        if make_3d:
-            full_pds_3d = pd.concat([pd.read_csv(
-                x, header=0, sep='\t', dtype={'sample_name': str}) for x in
-                fpos_3d])
-            print(full_pds_3d)
-            print(full_pds_3d.columns)
-            full_pds_3d = full_pds_3d.set_index(
-                [x for x in full_pds_3d.columns if 'cluster' not in x]
-            ).stack().reset_index().rename(
-                columns={'level_6': 'variable', 0: 'factor'}
-            )
-            fpo_3d = '%s_xphate_3d.tsv' % splitext(o_html)[0]
-            full_pds_3d.to_csv(fpo_3d, index=False, sep='\t')
-            for i_3d in fpos_3d:
-                os.remove(i_3d)
+        # if make_3d:
+        #     full_pds_3d = pd.concat([pd.read_csv(
+        #         x, header=0, sep='\t', dtype={'sample_name': str}) for x in
+        #         fpos_3d])
+        #     full_pds_3d = full_pds_3d.set_index(
+        #         [x for x in full_pds_3d.columns if 'cluster' not in x]
+        #     ).stack().reset_index().rename(
+        #         columns={'level_6': 'variable', 0: 'factor'}
+        #     )
+        #     fpo_3d = '%s_xphate_3d.tsv' % splitext(o_html)[0]
+        #     full_pds_3d.to_csv(fpo_3d, index=False, sep='\t')
+        #     for i_3d in fpos_3d:
+        #         os.remove(i_3d)
 
     metadata, columns = pd.DataFrame(), []
     if m_metadata:
