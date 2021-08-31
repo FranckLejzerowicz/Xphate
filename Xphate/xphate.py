@@ -121,13 +121,15 @@ def xphate(
             os.remove(i)
 
         if make_3d:
+
             full_pds_3d = pd.concat([pd.read_csv(
                 x, header=0, sep='\t', dtype={'sample_name': str}) for x in
                 fpos_3d])
+            print(full_pds_3d[:4])
             full_pds_3d = full_pds_3d.set_index(
                 [x for x in full_pds_3d.columns if 'cluster' not in x]
             )
-            print(full_pds_3d)
+            print(full_pds_3d[:4])
             full_pds_3d = full_pds_3d.stack().reset_index().rename(
                 columns={'level_6': 'variable', 0: 'factor'}
             )
