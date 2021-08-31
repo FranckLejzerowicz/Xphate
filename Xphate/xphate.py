@@ -110,11 +110,13 @@ def xphate(
 
         full_pds = pd.concat([pd.read_csv(
             x, header=0, sep='\t', dtype={'sample_name': str}) for x in fpos])
+        print(full_pds[:4])
         full_pds = full_pds.set_index(
             [x for x in full_pds.columns if 'cluster' not in x]
         ).stack().reset_index().rename(
             columns={'level_6': 'variable', 0: 'factor'}
         )
+        print(full_pds[:4])
         fpo = '%s_xphate.tsv' % splitext(o_html)[0]
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
