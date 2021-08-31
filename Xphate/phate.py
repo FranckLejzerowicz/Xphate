@@ -40,10 +40,10 @@ def run_phate(fpo, fpo_3d, tab_norm, knn, decays, ts, n_jobs, make_3d, verbose):
             phate_3d = phate_op.transform()
             data_phate_3d = pd.DataFrame(
                 phate_3d, columns=['PHATE1', 'PHATE2', 'PHATE3'])
-            data_phate['knn'] = knn
-            data_phate['decay'] = decay
-            data_phate['t'] = t
-            data_phate['sample_name'] = tab_norm.index.tolist()
+            data_phate_3d['knn'] = knn
+            data_phate_3d['decay'] = decay
+            data_phate_3d['t'] = t
+            data_phate_3d['sample_name'] = tab_norm.index.tolist()
             data_phates_3d.append(data_phate_3d)
 
     pd.concat(data_phates).to_csv(fpo, index=False, sep='\t')
