@@ -121,7 +121,6 @@ def xphate(
             os.remove(i)
 
         if make_3d:
-
             full_pds_3d = pd.concat([pd.read_csv(
                 x, header=0, sep='\t', dtype={'sample_name': str}) for x in
                 fpos_3d])
@@ -162,6 +161,7 @@ def xphate(
             metadata, on='sample_name', how='left'
         )
         full_pds_meta['dtype'] = [dtypes[var] for var in full_pds_meta.variable]
+
         if verbose:
             print('done.')
         full_pds['dtype'] = 'categorical'

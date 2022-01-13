@@ -18,7 +18,7 @@ def get_param(p_param, param, suffix):
         suffix += '_%s-%s-%s-%s' % (
             param, p_param[0], (p_param[1] + 1), param_step)
     elif len(p_param) == 1:
-        param_step = None
+        param_step = 1
         param_range = [p_param[0]]
         suffix += '_%s-%s' % (param, p_param[0])
     return param_step, param_range
@@ -31,10 +31,12 @@ def get_metadata(m_metadata: str, p_columns: tuple) -> (pd.DataFrame, str):
         with open(m_metadata) as f:
             for line in f:
                 break
-        metadata = pd.read_csv(m_metadata, header=0, sep='\t', dtype={line.split('\t')[0]: str})
-        metadata = metadata.rename(columns={metadata.columns.tolist()[0]: 'sample_name'})
-        metadata.columns = [x.replace('\n', '') for x in metadata.columns]
+        first_var = line.split('\t')[0]
+        metadata = pd.read_csv(m_metadata, header=0, sep='\t', dtype={first_var: str})
+        metadata = metadata.rename(columns={first_var: 'sample_name'})
+        cols = [x.replace('\n', '') for x in metadata.columns]
+        metadata.columns = cols
         for p_column in p_columns:
-            if p_column in metadata.columns.tolist()[1:]:
+            if p_column in cols:
                 columns.append(p_column)
     return metadata, columns
