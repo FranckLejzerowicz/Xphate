@@ -53,6 +53,7 @@ def xphate(
     knns_step, knns = get_param(p_knns, 'k', suffix)
 
     if i_res:
+        print('i_res', i_res)
         full_pds = pd.read_csv(i_res, header=0, sep='\t', dtype={'sample_name': str})
     else:
         i_table = abspath(i_table)
@@ -113,8 +114,7 @@ def xphate(
         full_pds = full_pds.set_index(
             [x for x in full_pds.columns if 'cluster' not in x]
         ).stack().reset_index().rename(
-            columns={'level_6': 'variable', 0: 'factor'}
-        )
+            columns={'level_6': 'variable', 0: 'factor'})
         fpo = '%s_xphate.tsv' % splitext(o_html)[0]
         full_pds.to_csv(fpo, index=False, sep='\t')
         for i in fpos:
@@ -141,9 +141,8 @@ def xphate(
         metadata = metadata[
             (['sample_name'] + columns)
         ].set_index(
-            'sample_name'
-        )
-        dtypes = {}
+            'sample_name')
+        dtypes = {'NA': 'avoid'}
         for col in columns:
             dt = str(metadata[col].dtype)
             if dt == 'object':
@@ -151,15 +150,13 @@ def xphate(
             else:
                 dtype = 'numerical'
             dtypes[col] = dtype
-
         metadata = metadata.stack().reset_index().rename(
-            columns={'level_1': 'variable', 0: 'factor'}
-        )
+            columns={'level_1': 'variable', 0: 'factor'})
         full_pds_meta = full_pds.drop(
             columns=['variable', 'factor']
         ).merge(
             metadata, on='sample_name', how='left'
-        )
+        ).fillna('NA')
         full_pds_meta['dtype'] = [dtypes[var] for var in full_pds_meta.variable]
 
         if verbose:
