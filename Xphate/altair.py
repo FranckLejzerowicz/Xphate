@@ -169,10 +169,13 @@ def single_figure(text, o_html, full_pds):
                 x for x in cats['variable'] if str(x) != 'nan'],
                 key=lambda x: -len(x))[0]
             cats_dropdown = alt.binding_select(
-                options=cats['variable'].unique(), name='variable:')
+                options=sorted(cats['variable'].unique()), name='variable:')
             cats_select = alt.selection_single(
                 fields=['variable'], bind=cats_dropdown,
-                name="categorical variable", init={'variable': cats_init})
+                name="categorical variable",
+                value=cats_init,
+                # init={'variable': cats_init}
+            )
             cats_plot = make_subplot(
                 circ, cats_select, list(tooltip), 'N')
             has_cats = 1
@@ -183,10 +186,13 @@ def single_figure(text, o_html, full_pds):
                 x for x in nums['variable'] if str(x) != 'nan'],
                 key=lambda x: -len(x))[0]
             nums_dropdown = alt.binding_select(
-                options=nums['variable'].unique(), name='variable:')
+                options=sorted(nums['variable'].unique()), name='variable:')
             nums_select = alt.selection_single(
                 fields=['variable'], bind=nums_dropdown,
-                name="numerical variable", init={'variable': cats_init})
+                name="numerical variable",
+                value=cats_init,
+                # init={'variable': cats_init}
+            )
             nums_plot = make_subplot(
                 circ, nums_select, list(tooltip), 'Q')
             has_nums = 1
