@@ -173,7 +173,7 @@ def single_figure(text, o_html, full_pds):
             cats_select = alt.selection_single(
                 fields=['variable'], bind=cats_dropdown,
                 name="categorical variable",
-                value=cats_init,
+                # value=cats_init,
                 # init={'variable': cats_init}
             )
             cats_plot = make_subplot(
@@ -190,7 +190,7 @@ def single_figure(text, o_html, full_pds):
             nums_select = alt.selection_single(
                 fields=['variable'], bind=nums_dropdown,
                 name="numerical variable",
-                value=cats_init,
+                # value=cats_init,
                 # init={'variable': cats_init}
             )
             nums_plot = make_subplot(
