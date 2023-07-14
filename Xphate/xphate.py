@@ -126,6 +126,8 @@ def xphate(
                 fpos_3d])
             fpo_3d = '%s_xphate_3d.tsv' % splitext(o_html)[0]
             full_pds_3d.to_csv(fpo_3d, index=False, sep='\t')
+            for i in fpos_3d:
+                os.remove(i)
 
     metadata, columns = pd.DataFrame(), []
     if m_metadata:
