@@ -170,11 +170,11 @@ def single_figure(text, o_html, full_pds):
                 key=lambda x: -len(x))[0]
             cats_dropdown = alt.binding_select(
                 options=sorted(cats['variable'].unique()), name='variable:')
-            cats_select = alt.selection_single(
+            cats_select = alt.selection_point(
                 fields=['variable'],
                 bind=cats_dropdown,
                 name="categorical variable",
-                # value=cats_init,
+                value=cats_init,
                 # init={'variable': cats_init}
             )
             cats_plot = make_subplot(
@@ -188,11 +188,11 @@ def single_figure(text, o_html, full_pds):
                 key=lambda x: -len(x))[0]
             nums_dropdown = alt.binding_select(
                 options=sorted(nums['variable'].unique()), name='variable:')
-            nums_select = alt.selection_single(
+            nums_select = alt.selection_point(
                 fields=['variable'],
                 bind=nums_dropdown,
                 name="numerical variable",
-                # value=cats_init,
+                value=cats_init,
                 # init={'variable': cats_init}
             )
             nums_plot = make_subplot(
