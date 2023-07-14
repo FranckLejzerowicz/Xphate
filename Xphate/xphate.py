@@ -152,7 +152,7 @@ def xphate(
             else:
                 dtype = 'numerical'
             dtypes[col] = dtype
-        metadata = metadata.stack().reset_index().rename(
+        metadata = metadata.fillna('NA').stack().reset_index().rename(
             columns={'level_1': 'variable', 0: 'factor'})
         full_pds_meta = full_pds.drop(
             columns=['variable', 'factor']

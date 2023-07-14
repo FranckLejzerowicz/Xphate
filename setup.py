@@ -53,7 +53,8 @@ setup(
     install_requires=[
         "click >= 6.7",
         'pandas >= 0.19.0',
-        'altair >= 4.1.0',
+        # 'altair >= 4.1.0',
+        'altair == 3.1.0',
         'scikit-learn',
         'phate'
     ],
