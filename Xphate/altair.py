@@ -171,7 +171,8 @@ def single_figure(text, o_html, full_pds):
             cats_dropdown = alt.binding_select(
                 options=sorted(cats['variable'].unique()), name='variable:')
             cats_select = alt.selection_single(
-                fields=['variable'], bind=cats_dropdown,
+                fields=['variable'],
+                bind=cats_dropdown,
                 name="categorical variable",
                 # value=cats_init,
                 # init={'variable': cats_init}
@@ -188,7 +189,8 @@ def single_figure(text, o_html, full_pds):
             nums_dropdown = alt.binding_select(
                 options=sorted(nums['variable'].unique()), name='variable:')
             nums_select = alt.selection_single(
-                fields=['variable'], bind=nums_dropdown,
+                fields=['variable'],
+                bind=nums_dropdown,
                 name="numerical variable",
                 # value=cats_init,
                 # init={'variable': cats_init}
